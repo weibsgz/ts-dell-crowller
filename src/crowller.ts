@@ -11,6 +11,12 @@ class Crowller {
   //抓取路径
   private filePath = path.resolve(__dirname, "../data/course.json");
 
+  //private analyzer 相当于 this.analyzer = analyzer public也是同样的意思
+  constructor(private url: string, private analyzer: Analyzer) {
+    // this.analyzer = analyzer;
+    this.initSpiderProcess();
+  }
+
   async getRawHtml() {
     const result = await superagent.get(this.url);
     return result.text;
@@ -21,18 +27,18 @@ class Crowller {
   }
 
   async initSpiderProcess() {
+    //先抓取HTML
     const html = await this.getRawHtml();
+    //处理业务逻辑
     const fileContent = this.analyzer.analyze(html, this.filePath);
+    //写文件
     this.writeFile(fileContent);
-  }
-
-  constructor(private url: string, private analyzer: Analyzer) {
-    this.initSpiderProcess();
   }
 }
 
 const secret = "secretKey";
 const url = `http://www.dell-lee.com/typescript/demo.html?secret=${secret}`;
 
-const analyzer = new LeeAnalyzer();
+const analyzer = LeeAnalyzer.getInstance();
+
 new Crowller(url, analyzer);
